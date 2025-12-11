@@ -2,7 +2,6 @@
 Tests for FastAPI authentication endpoints
 """
 import pytest
-from test.test_fastapi_conftest import client, db_session, test_user_data, test_user, auth_headers
 
 
 class TestAuthRegistration:

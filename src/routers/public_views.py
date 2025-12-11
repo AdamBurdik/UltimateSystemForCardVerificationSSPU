@@ -49,11 +49,11 @@ async def index(request: Request, db: Session = Depends(get_db)):
     """Homepage"""
     user = get_current_user_from_session(request, db)
     current_user = user if user else AnonymousUser()
-    
+
     # Helper function for templates
     def get_flashed_messages_func(with_categories=False):
         return get_flashed_messages(request, with_categories)
-    
+
     return templates.TemplateResponse(
         "public/index.tmpl",
         {

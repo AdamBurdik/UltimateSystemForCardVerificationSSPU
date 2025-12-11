@@ -23,7 +23,7 @@ class FlashMessage:
         if "flash_messages" not in request.session:
             request.session["flash_messages"] = []
         request.session["flash_messages"].append({"message": message, "category": category})
-    
+
     @staticmethod
     def get(request: Request):
         messages = request.session.pop("flash_messages", [])
@@ -58,7 +58,7 @@ class MockForm:
         self.username = MockField(name="username", label="Username")
         self.remember_me = MockField(name="remember_me", label="Remember me")
         self.csrf_token = MockField(name="csrf_token", label="")
-    
+
     def hidden_tag(self):
         return ''
 
@@ -75,17 +75,17 @@ class MockField:
 def get_template_context(request: Request, db: Session, **kwargs):
     """Helper to create standard template context with get_flashed_messages"""
     user = get_current_user_from_session(request, db) or AnonymousUser()
-    
+
     # Get flash messages but don't clear them yet - let template decide
     flash_messages_store = request.session.get("flash_messages", [])
-    
+
     def get_flashed_messages_func(with_categories=False):
         # Clear messages on first call
         messages = request.session.pop("flash_messages", [])
         if with_categories:
             return [(msg["category"], msg["message"]) for msg in messages]
         return [msg["message"] for msg in messages]
-    
+
     context = {
         "request": request,
         "user": user,
@@ -114,7 +114,7 @@ async def login_submit(
 ):
     """Handle login form submission"""
     user = db.query(User).filter(User.email == email).first()
-    
+
     # Use verify_password function from auth_utils
     if user and verify_password(password, user.password):
         # Store user ID in session
@@ -156,13 +156,13 @@ async def register_submit(
     if existing_user:
         FlashMessage.add(request, "Jméno už je obsazeno", "warning")
         return RedirectResponse(url="/auth/register", status_code=303)
-    
+
     # Check if email already exists
     existing_email = db.query(User).filter(User.email == email).first()
     if existing_email:
         FlashMessage.add(request, "Tento e-mail už používá jiný uživatel", "warning")
         return RedirectResponse(url="/auth/register", status_code=303)
-    
+
     # Create new user
     hashed_password = get_password_hash(password)
     new_user = User(
@@ -170,14 +170,14 @@ async def register_submit(
         email=email,
         password=hashed_password
     )
-    
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    
+
     # Log in the new user
     request.session["user_id"] = new_user.id
-    
+
     FlashMessage.add(request, f"Thanks for signing up {username}. Welcome!", "info")
     return RedirectResponse(url="/", status_code=303)
 
@@ -189,11 +189,11 @@ async def account_page(request: Request, db: Session = Depends(get_db)):
     if not user:
         FlashMessage.add(request, "Please log in to access this page", "warning")
         return RedirectResponse(url="/auth/login", status_code=303)
-    
+
     form = MockForm()
     form.username.data = user.username
     form.email.data = user.email
-    
+
     context = get_template_context(request, db, form=form)
     return templates.TemplateResponse("auth/editAccountAdmin.tmpl", context)
 

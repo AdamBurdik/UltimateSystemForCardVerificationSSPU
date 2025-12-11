@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import Optional
 from datetime import datetime, time
 
@@ -33,9 +33,8 @@ class UserResponse(UserBase):
     second_name: Optional[str] = None
     is_active: bool = True
     created_at: Optional[datetime] = None
-    
-    class Config:
-        from_attributes = True  # Pydantic v2 (was orm_mode in v1)
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Token schemas
@@ -71,9 +70,8 @@ class CardCreate(CardBase):
 class CardResponse(CardBase):
     id: int
     user_id: Optional[int] = None
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Group schemas
@@ -91,9 +89,8 @@ class GroupUpdate(BaseModel):
 
 class GroupResponse(GroupBase):
     id: int
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Timecard schemas
@@ -109,16 +106,16 @@ class TimecardCreate(TimecardBase):
 
 class TimecardResponse(TimecardBase):
     id: int
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # File upload schema
 class FileUpload(BaseModel):
     filename: str
-    
-    @validator('filename')
+
+    @field_validator('filename')
+    @classmethod
     def validate_extension(cls, v):
         if not v.endswith('.xml'):
             raise ValueError('Only XML files are allowed')
