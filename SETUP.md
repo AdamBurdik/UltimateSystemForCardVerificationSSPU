@@ -58,10 +58,11 @@ pip install fastapi uvicorn 'pydantic[email]' pydantic-settings \
 ## Step 4: Configure Environment Variables
 
 Create a `.env` file in the project root directory:
+**Ensure that it is encoded in plain UTF-8!!!**
 
 ```bash
 # Generate a secure secret key
-python3 -c 'import secrets; print(f"SECRET_KEY={secrets.token_hex(32)}")' > .env
+py -c "import secrets; print(f'SECRET_KEY={secrets.token_hex(32)}')" > .env
 
 # Add database URL (SQLite for development)
 echo "DATABASE_URL=sqlite:///./dev.db" >> .env
@@ -116,10 +117,11 @@ uvicorn src.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 The application will be available at:
-- **Application**: http://localhost:8000
-- **API Documentation (Swagger)**: http://localhost:8000/api/docs
-- **API Documentation (ReDoc)**: http://localhost:8000/api/redoc
-- **Health Check**: http://localhost:8000/health
+
+- **Application**: <http://localhost:8000>
+- **API Documentation (Swagger)**: <http://localhost:8000/api/docs>
+- **API Documentation (ReDoc)**: <http://localhost:8000/api/redoc>
+- **Health Check**: <http://localhost:8000/health>
 
 ### Production Server
 
@@ -137,7 +139,8 @@ gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
 
 ### Using the Interactive API Documentation
 
-Open http://localhost:8000/api/docs in your browser. You can:
+Open <http://localhost:8000/api/docs> in your browser. You can:
+
 1. View all available endpoints
 2. Test endpoints directly from the browser
 3. See request/response schemas
@@ -225,7 +228,7 @@ pip install 'pydantic[email]' email-validator
 
 ## Next Steps
 
-1. **Explore the API**: Visit http://localhost:8000/api/docs
+1. **Explore the API**: Visit <http://localhost:8000/api/docs>
 2. **Read the Documentation**: Check `FASTAPI_MIGRATION.md` and `PROJECT_SUMMARY.md`
 3. **Customize**: Modify `src/config.py` for your needs
 4. **Add Features**: Create new routers in `src/routers/`
@@ -312,8 +315,9 @@ git push heroku main
 ## Support
 
 For issues or questions:
+
 1. Check the documentation in this repository
-2. Review the FastAPI documentation: https://fastapi.tiangolo.com
+2. Review the FastAPI documentation: <https://fastapi.tiangolo.com>
 3. Open an issue on GitHub
 
 ## License
