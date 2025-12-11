@@ -1,5 +1,242 @@
-## [Flask Skeleton][flask-skeleton]
-Flask Skeleton provides a base structure for a medium-sized Flask app. This incorporates several Flask best practices and is my default setup for whenever I create a new Flask project. This was built and tested with Python 2.
+# Ultimate System for Card Verification (SSPU)
+
+A modern Flask-based card verification and time tracking system, built with Python 3.12+ and Flask 3.x.
+
+## Features
+
+* **Modern Python & Flask**: Built with Python 3.8+ and Flask 3.x
+* **User Authentication**: Secure authentication with Flask-Login and bcrypt password hashing
+* **Database Support**: MySQL/MariaDB support with SQLAlchemy 2.0 ORM
+* **Database Migrations**: Version-controlled schema migrations with Alembic and Flask-Migrate
+* **Real-time Communication**: MQTT and WebSocket support for real-time updates
+* **Asset Management**: Automated asset concatenation and minification with Flask-Assets
+* **Email Support**: User activation and password recovery with Flask-Mail
+* **Testing**: Comprehensive test suite with pytest and webtest
+* **Code Quality**: Static analysis with pylint and pycodestyle
+* **Modern CLI**: Flask CLI for management commands
+
+## Table of Contents
+* [Requirements](#requirements)
+* [Quickstart](#quickstart)
+* [Installation](#installation)
+* [Configuration](#configuration)
+* [Database Setup](#database-setup)
+* [Running the Application](#running-the-application)
+* [Testing](#testing)
+* [Development](#development)
+
+## Requirements
+
+* Python 3.8 or higher
+* MySQL/MariaDB database (or SQLite for development)
+* pip and virtualenv (or venv)
+
+## Quickstart
+
+Quick setup for development:
+
+```bash
+git clone https://github.com/AdamBurdik/UltimateSystemForCardVerificationSSPU.git
+cd UltimateSystemForCardVerificationSSPU
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -e .
+
+# Set up environment variables
+python -c 'import os; print(f"APP_KEY={os.urandom(24).hex()}")' > .env
+
+# Initialize database
+flask db upgrade
+
+# Run the development server
+./manage.py runserver
+```
+
+Now visit [http://localhost:5000/](http://localhost:5000/) in your browser.
+
+## Installation
+
+### Using Virtual Environment
+
+1. Create and activate a virtual environment:
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install the application:
+```bash
+pip install -e .
+```
+
+Or install with development dependencies:
+```bash
+pip install -e ".[dev]"
+```
+
+### Using Make
+
+The Makefile provides convenient commands:
+```bash
+make virtualenv  # Creates venv and installs dependencies
+make check       # Runs linters and tests
+make clean       # Cleans up build artifacts
+```
+
+## Configuration
+
+The application uses environment variables for sensitive configuration. Create a `.env` file in the project root:
+
+```bash
+# Required: Secret key for sessions
+APP_KEY=your-secret-key-here
+
+# Optional: Email configuration
+APP_MAIL_USERNAME=your-email@gmail.com
+APP_MAIL_PASSWORD=your-app-password
+APP_MAIL_INFO_ACCOUNT=info@example.com
+APP_TEST_RECIPIENT=test@example.com
+
+# Optional: Database URL (defaults to SQLite in development)
+DATABASE_URL=mysql+pymysql://user:password@localhost/dbname
+```
+
+Generate a secure secret key:
+```bash
+python -c 'import os; print(f"APP_KEY={os.urandom(24).hex()}")'
+```
+
+### Environment Modes
+
+Set `APP_ENV` to control the configuration:
+* `dev` - Development mode (default, uses SQLite)
+* `test` - Testing mode (in-memory SQLite)
+* `prod` - Production mode (uses MySQL/MariaDB)
+
+## Database Setup
+
+### Development (SQLite)
+```bash
+flask db upgrade
+```
+
+### Production (MySQL)
+1. Create the database:
+```sql
+CREATE DATABASE karty CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+2. Set the DATABASE_URL:
+```bash
+export DATABASE_URL='mysql+pymysql://user:password@localhost/karty?charset=utf8'
+```
+
+3. Run migrations:
+```bash
+APP_ENV=prod flask db upgrade
+```
+
+## Running the Application
+
+### Development Server
+```bash
+./manage.py runserver
+# Or with custom host/port:
+./manage.py runserver --host=0.0.0.0 --port=8080
+```
+
+### Production Server
+```bash
+gunicorn -w 4 -b 0.0.0.0:8000 'src.app:create_app(src.settings.app_config)'
+```
+
+### Other Commands
+```bash
+./manage.py shell         # Python shell with app context
+./manage.py routes        # List all routes
+./manage.py test_email    # Send test email
+flask db history          # Show migration history
+flask db migrate -m "msg" # Create new migration
+```
+
+## Testing
+
+Run the test suite:
+```bash
+# All tests
+pytest
+
+# With coverage
+pytest --cov=src
+
+# Specific test file
+pytest test/test_auth.py
+
+# Run slow tests
+pytest --runslow
+```
+
+Run linters:
+```bash
+make check           # All checks
+make pycodestyle     # Style check
+make pylint          # Code quality check
+```
+
+## Development
+
+### Project Structure
+```
+src/
+├── app.py              # Application factory
+├── settings.py         # Configuration
+├── extensions.py       # Flask extensions
+├── auth/              # Authentication blueprint
+├── public/            # Public pages blueprint
+├── services/          # Services blueprint
+├── data/              # Database models and utilities
+│   ├── models/        # SQLAlchemy models
+│   ├── database.py    # Database connection
+│   └── base.py        # Base model classes
+├── static/            # Static assets
+└── templates/         # Jinja2 templates
+
+test/                  # Test suite
+migrations/            # Database migrations
+```
+
+### Code Quality
+
+The project uses:
+* **pycodestyle**: PEP 8 style checking
+* **pylint**: Code quality and error detection
+* **pytest**: Testing framework
+
+Configuration is in `pyproject.toml` and `setup.cfg`.
+
+## Changelog
+
+### 2.0.0 (2024)
+* **Modernization Release**
+* Upgraded to Python 3.8+
+* Upgraded to Flask 3.x
+* Upgraded to SQLAlchemy 2.0
+* Replaced flask-script with Flask CLI
+* Updated all dependencies to latest versions
+* Improved code quality and Python 3 compatibility
+* Added pyproject.toml for modern packaging
+* Fixed security vulnerabilities in old dependencies
+
+### 0.1.0 (2014)
+* Initial release based on Flask Skeleton
+
+## License
+
+MIT License
 
 Here's the stuff you get right off the bat when using Flask-Skeleton:
 * Bootstrap starter template

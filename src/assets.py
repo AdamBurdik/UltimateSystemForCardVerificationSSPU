@@ -2,8 +2,9 @@ from flask_assets import Environment, Bundle
 
 CSS_ASSETS = [
     'css/vendor/bootstrap.css',
-    Bundle('css/application.scss', filters='pyscss', output='css/compiled-scss.css')
+    Bundle('css/application.scss', filters='libsass', output='css/compiled-scss.css')
 ]
+
 
 def register_assets(app):
     assets = Environment(app)

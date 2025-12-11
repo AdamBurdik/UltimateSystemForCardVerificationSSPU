@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Query
 from sqlalchemy.schema import MetaData
-from sqlalchemy.ext.declarative import declarative_base
-from datetime import date,datetime
+from sqlalchemy.orm import declarative_base
+from datetime import date, datetime
 
 from .pagination import Pagination
 
-class BaseModel(object):
+
+class BaseModel:
     """
     The base class for all of our database models.
     """
@@ -42,7 +43,7 @@ class BaseModel(object):
         def format_assignment(col, value):
             return '{}={}'.format(col.key, repr(value))
 
-        arglist = "{}".format(', '.join([format_assignment(*pair) for pair in col_dict.iteritems()]))
+        arglist = "{}".format(', '.join([format_assignment(*pair) for pair in col_dict.items()]))
         return "{}({})".format(type(self).__name__, arglist)
 
     def __str__(self):
@@ -51,6 +52,7 @@ class BaseModel(object):
 
     def __repr__(self):
         return self._format_ctor(self.to_dict())
+
 
 class BaseQuery(Query):
     """
@@ -84,6 +86,7 @@ class BaseQuery(Query):
 
         return Pagination(self, page, per_page, total, items)
 
+
 def named_declarative_base(**kwargs):
     """
     Returns a declarative base SQLAlchemy object with naming conventions
@@ -104,7 +107,8 @@ def named_declarative_base(**kwargs):
 
     return declarative_base(metadata=metadata, **kwargs)
 
-class AutoSerialize(object):
+
+class AutoSerialize:
     'Mixin for retrieving public fields of model in json-compatible format'
     __public__ = None
 
@@ -113,9 +117,11 @@ class AutoSerialize(object):
         data = {}
         keys = self._sa_instance_state.attrs.items()
         public = self.__public__ + extra if self.__public__ else extra
-        for k, field in  keys:
-            if public and k not in public: continue
-            if k in exclude: continue
+        for k, field in keys:
+            if public and k not in public:
+                continue
+            if k in exclude:
+                continue
             value = self._serialize(field.value)
             if value:
                 data[k] = value
@@ -125,15 +131,16 @@ class AutoSerialize(object):
     def _serialize(cls, value, follow_fk=False):
         if type(value) in (datetime, date):
             ret = value.isoformat()
-        elif hasattr(value, '__iter__'):
+        elif hasattr(value, '__iter__') and not isinstance(value, str):
             ret = []
             for v in value:
                 ret.append(cls._serialize(v))
-        elif AutoSerialize in value.__class__.__bases__:
+        elif hasattr(value, '__class__') and AutoSerialize in value.__class__.__bases__:
             ret = value.get_public()
         else:
             ret = value
 
         return ret
 
-Base = named_declarative_base(cls=(BaseModel,AutoSerialize))
+
+Base = named_declarative_base(cls=(BaseModel, AutoSerialize))

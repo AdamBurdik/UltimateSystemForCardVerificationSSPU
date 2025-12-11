@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ultimate-card-verification-system"
+version = "3.0.0"
+description = "Ultimate System for Card Verification - SSPU (FastAPI)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Adam Burdik", email = "adam@example.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.12",
+    "pydantic>=2.10.0",
+    "pydantic[email]>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    "alembic>=1.13.0",
+    "sqlalchemy>=2.0.0",
+    "pymysql>=1.1.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "fastapi-mail>=1.4.0",
+    "email-validator>=2.0.0",
+    "jinja2>=3.1.0",
+    "simplejson>=3.19.0",
+    "xmltodict>=0.13.0",
+    "paho-mqtt>=1.6.0",
+    "websockets>=13.0",
+    "gunicorn>=21.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "httpx>=0.27.0",
+    "pytest-asyncio>=0.24.0",
+    "pycodestyle>=2.11.0",
+    "pylint>=3.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/AdamBurdik/UltimateSystemForCardVerificationSSPU"
+Repository = "https://github.com/AdamBurdik/UltimateSystemForCardVerificationSSPU"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+
+[tool.pycodestyle]
+ignore = ["E221", "E251", "E301", "E302", "E303", "E711"]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = [
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+]
+
+[tool.pylint.format]
+max-line-length = 120
