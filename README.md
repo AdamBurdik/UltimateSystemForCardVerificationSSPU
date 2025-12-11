@@ -1,19 +1,19 @@
 # Ultimate System for Card Verification (SSPU)
 
-A modern Flask-based card verification and time tracking system, built with Python 3.12+ and Flask 3.x.
+A modern FastAPI-based card verification and time tracking system, built with Python 3.8+ and FastAPI 0.115+.
 
 ## Features
 
-* **Modern Python & Flask**: Built with Python 3.8+ and Flask 3.x
-* **User Authentication**: Secure authentication with Flask-Login and bcrypt password hashing
+* **Modern Python & FastAPI**: Built with Python 3.8+ and FastAPI 0.115+ (migrated from Flask 3.x)
+* **User Authentication**: Secure JWT-based authentication with bcrypt password hashing
 * **Database Support**: MySQL/MariaDB support with SQLAlchemy 2.0 ORM
-* **Database Migrations**: Version-controlled schema migrations with Alembic and Flask-Migrate
+* **Database Migrations**: Version-controlled schema migrations with Alembic
 * **Real-time Communication**: MQTT and WebSocket support for real-time updates
-* **Asset Management**: Automated asset concatenation and minification with Flask-Assets
-* **Email Support**: User activation and password recovery with Flask-Mail
-* **Testing**: Comprehensive test suite with pytest and webtest
+* **Auto API Documentation**: Interactive API docs with Swagger UI and ReDoc
+* **Email Support**: User activation and password recovery with FastAPI-Mail
+* **Testing**: Comprehensive test suite with pytest and httpx
 * **Code Quality**: Static analysis with pylint and pycodestyle
-* **Modern CLI**: Flask CLI for management commands
+* **Modern UI**: Bootstrap 5-based responsive user interface
 
 ## Table of Contents
 * [Requirements](#requirements)
@@ -47,16 +47,21 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -e .
 
 # Set up environment variables
-python -c 'import os; print(f"APP_KEY={os.urandom(24).hex()}")' > .env
+python3 -c 'import secrets; print(f"SECRET_KEY={secrets.token_hex(32)}")' > .env
+echo "DATABASE_URL=sqlite:///./dev.db" >> .env
 
-# Initialize database
-flask db upgrade
+# Initialize database (optional - auto-created in dev mode)
+alembic upgrade head
 
 # Run the development server
-./manage.py runserver
+./run.py --reload
+# Or: uvicorn src.main:app --reload
 ```
 
-Now visit [http://localhost:5000/](http://localhost:5000/) in your browser.
+Now visit [http://localhost:8000/](http://localhost:8000/) in your browser.
+
+* **GUI**: [http://localhost:8000/](http://localhost:8000/)
+* **API Docs**: [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
 
 ## Installation
 
@@ -137,30 +142,36 @@ export DATABASE_URL='mysql+pymysql://user:password@localhost/karty?charset=utf8'
 
 3. Run migrations:
 ```bash
-APP_ENV=prod flask db upgrade
+APP_ENV=prod alembic upgrade head
 ```
 
 ## Running the Application
 
 ### Development Server
 ```bash
-./manage.py runserver
+./run.py --reload
 # Or with custom host/port:
-./manage.py runserver --host=0.0.0.0 --port=8080
+./run.py --host=0.0.0.0 --port=8080 --reload
+# Or using uvicorn directly:
+uvicorn src.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 ### Production Server
 ```bash
-gunicorn -w 4 -b 0.0.0.0:8000 'src.app:create_app(src.settings.app_config)'
+# Using Uvicorn with workers
+uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+# Or using Gunicorn with Uvicorn workers
+gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
 ```
 
-### Other Commands
+### Database Migrations
 ```bash
-./manage.py shell         # Python shell with app context
-./manage.py routes        # List all routes
-./manage.py test_email    # Send test email
-flask db history          # Show migration history
-flask db migrate -m "msg" # Create new migration
+alembic current                  # Show current migration
+alembic history                  # Show migration history
+alembic revision --autogenerate -m "msg"  # Create new migration
+alembic upgrade head             # Apply all migrations
+alembic downgrade -1             # Rollback one migration
 ```
 
 ## Testing

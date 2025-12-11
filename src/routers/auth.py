@@ -29,7 +29,7 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered"
         )
-    
+
     # Check if email already exists
     existing_email = db.query(User).filter(User.email == user_data.email).first()
     if existing_email:
@@ -37,7 +37,7 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    
+
     # Create new user
     hashed_password = get_password_hash(user_data.password)
     new_user = User(
@@ -47,11 +47,11 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
         first_name=user_data.first_name,
         second_name=user_data.second_name
     )
-    
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    
+
     return new_user
 
 
@@ -62,34 +62,34 @@ async def login(
 ):
     """
     Login and get access token
-    
+
     The OAuth2PasswordRequestForm expects:
     - username (we'll use email)
     - password
     """
     # Find user by email (using username field from form)
     user = db.query(User).filter(User.email == form_data.username).first()
-    
+
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )
-    
+
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(user.id)},
         expires_delta=access_token_expires
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -118,11 +118,11 @@ async def request_password_reset(
     Request password reset - sends email with reset token
     """
     user = db.query(User).filter(User.email == request_data.email).first()
-    
+
     if not user:
         # Don't reveal that user doesn't exist
         return {"message": "If the email exists, a password reset link has been sent"}
-    
+
     # TODO: Implement password reset token generation and email sending
     # For now, return success message
     return {"message": "If the email exists, a password reset link has been sent"}
