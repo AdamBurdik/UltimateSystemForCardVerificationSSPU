@@ -7,6 +7,7 @@ fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
 python-multipart>=0.0.12
 pydantic>=2.10.0
+pydantic[email]>=2.10.0
 pydantic-settings>=2.6.0
 
 # Database
@@ -17,10 +18,10 @@ pymysql>=1.1.0
 # Authentication & Security
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
-python-multipart>=0.0.12
 
 # Email
 fastapi-mail>=1.4.0
+email-validator>=2.0.0
 
 # Templates
 jinja2>=3.1.0
@@ -38,7 +39,7 @@ xmltodict>=0.13.0
 paho-mqtt>=1.6.0
 websockets>=13.0
 
-# Production server (uvicorn already included above)
+# Production server
 gunicorn>=21.2.0
 
 

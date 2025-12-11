@@ -8,6 +8,7 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "python-multipart>=0.0.12",
     "pydantic>=2.10.0",
+    "pydantic[email]>=2.10.0",
     "pydantic-settings>=2.6.0",
     # Database
     "alembic>=1.13.0",
@@ -18,6 +19,7 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4",
     # Email
     "fastapi-mail>=1.4.0",
+    "email-validator>=2.0.0",
     # Templates
     "jinja2>=3.1.0",
     # Testing
