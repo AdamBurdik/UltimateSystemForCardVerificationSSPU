@@ -22,7 +22,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def get_db() -> Generator[Session, None, None]:
     """
     Dependency for getting database session
-    
+
     Usage in FastAPI endpoints:
         @app.get("/items")
         def read_items(db: Session = Depends(get_db)):

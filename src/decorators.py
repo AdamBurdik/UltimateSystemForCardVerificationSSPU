@@ -6,7 +6,7 @@ from flask import flash, redirect, request, url_for
 from .data.database import db
 from .data.models import UserPasswordToken
 
-def async(f):
+def async_func(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         thr = Thread(target=f, args=args, kwargs=kwargs)

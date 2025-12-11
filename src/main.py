@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import HTMLResponse
+from contextlib import asynccontextmanager
 import os
 
 from .config import settings
@@ -20,6 +21,18 @@ templates = Jinja2Templates(directory=settings.TEMPLATES_DIR)
 templates.env.globals['url_for'] = util.url_for
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for startup and shutdown events
+    """
+    # Startup: Create database tables
+    if settings.DEBUG:
+        Base.metadata.create_all(bind=engine)
+    yield
+    # Shutdown: cleanup if needed
+
+
 def create_app() -> FastAPI:
     """
     Application factory for creating FastAPI app instance
@@ -30,8 +43,9 @@ def create_app() -> FastAPI:
         debug=settings.DEBUG,
         docs_url="/api/docs" if settings.DEBUG else None,
         redoc_url="/api/redoc" if settings.DEBUG else None,
+        lifespan=lifespan,
     )
-    
+
     # Add session middleware for template-based authentication
     app.add_middleware(
         SessionMiddleware,
@@ -39,7 +53,7 @@ def create_app() -> FastAPI:
         session_cookie="session",
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
-    
+
     # Configure CORS
     app.add_middleware(
         CORSMiddleware,
@@ -48,34 +62,24 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
+
     # Mount static files
     if os.path.exists(settings.STATIC_DIR):
         app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
-    
+
     # Register routers
     # API routers (JWT authentication)
     app.include_router(auth.router, prefix="/api/auth", tags=["api-auth"])
-    
+
     # GUI routers (session-based authentication)
     from .routers import auth_views, public_views
     # Set the shared templates instance on the routers
     public_views.templates = templates
     auth_views.templates = templates
-    
+
     app.include_router(public_views.router, tags=["public"])
     app.include_router(auth_views.router, prefix="/auth", tags=["auth"])
-    
-    # Create database tables (in production, use Alembic migrations)
-    @app.on_event("startup")
-    async def startup():
-        # Create tables if they don't exist
-        # In production, comment this out and use: alembic upgrade head
-        if settings.DEBUG:
-            Base.metadata.create_all(bind=engine)
-    
 
-    
     @app.get("/health")
     async def health_check():
         """Health check endpoint"""
@@ -84,7 +88,7 @@ def create_app() -> FastAPI:
             "version": settings.APP_VERSION,
             "environment": os.getenv("APP_ENV", "dev")
         }
-    
+
     return app
 
 

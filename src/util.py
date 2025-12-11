@@ -34,16 +34,16 @@ def url_for(endpoint: str, **kwargs) -> str:
     """
     Helper function to generate URLs similar to Flask's url_for.
     This is a simplified version for use in Jinja2 templates.
-    
+
     Args:
         endpoint: Route name in format 'blueprint.function_name'
         **kwargs: Additional query parameters
-    
+
     Returns:
         URL path string
     """
     from urllib.parse import urlencode
-    
+
     # Map of endpoint names to URL paths
     endpoint_map = {
         'public.index': '/',
@@ -75,15 +75,15 @@ def url_for(endpoint: str, **kwargs) -> str:
         'auth.vypisy': '/auth/vypisy',
         'static': '/static',
     }
-    
+
     # Get base URL from map
     url = endpoint_map.get(endpoint, '/' + endpoint.replace('.', '/'))
-    
+
     # Add query parameters if provided (properly URL-encoded)
     if kwargs:
         params = urlencode(kwargs)
         url = f"{url}?{params}"
-    
+
     return url
 
 

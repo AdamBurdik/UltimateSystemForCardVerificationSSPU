@@ -2,13 +2,100 @@
 {% extends "shared/layout.tmpl" %}
 
 {% block content %}
-  {% if current_user.is_anonymous() %}
-    <p>Please login</p>
-  {% elif not current_user.is_verified() %}
-    <p>
-      Please verify your account by clicking the activation link sent to your email address. Click <a href="{{ url_for('auth.resend_activation_email') }}">here</a> to resend.
-    </p>
-  {% else %}
-      <p>Welcome back {{ current_user.username|e }}</p>
-  {% endif %}
+  <div class="row">
+    <div class="col-md-12">
+      {% if current_user.is_anonymous() %}
+        <div class="jumbotron bg-light p-5 rounded">
+          <h1 class="display-4">📋 Systém docházky SSPU-Opava</h1>
+          <p class="lead">Vítejte v systému pro správu docházky a časových karet.</p>
+          <hr class="my-4">
+          <p>Pro přístup k systému se prosím přihlaste nebo se zaregistrujte.</p>
+          <div class="btn-group" role="group">
+            <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}" role="button">
+              <i class="bi bi-box-arrow-in-right"></i> Přihlásit se
+            </a>
+            <a class="btn btn-outline-primary btn-lg ms-2" href="{{ url_for('auth.register') }}" role="button">
+              <i class="bi bi-person-plus"></i> Registrovat
+            </a>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">🔐 Bezpečný přístup</h5>
+                <p class="card-text">Systém využívá moderní šifrování a autentizaci pro ochranu vašich dat.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">📊 Přehledné výpisy</h5>
+                <p class="card-text">Sledujte svou docházku s přehlednými měsíčními výpisy a statistikami.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">⚡ Rychlá správa</h5>
+                <p class="card-text">Efektivní nástroje pro správu skupin, uživatelů a časových karet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% elif not current_user.is_verified() %}
+        <div class="alert alert-warning" role="alert">
+          <h4 class="alert-heading">⚠️ Účet není ověřen</h4>
+          <p>
+            Prosím ověřte svůj účet kliknutím na aktivační odkaz zaslaný na váš email.
+          </p>
+          <hr>
+          <p class="mb-0">
+            Neobdrželi jste email? <a href="{{ url_for('auth.resend_activation_email') }}" class="alert-link">Odeslat znovu</a>
+          </p>
+        </div>
+      {% else %}
+        <div class="alert alert-success" role="alert">
+          <h4 class="alert-heading">👋 Vítejte zpět, {{ current_user.username|e }}!</h4>
+          <p>Jste úspěšně přihlášeni do systému docházky.</p>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Rychlé akce</h5>
+              </div>
+              <div class="list-group list-group-flush">
+                <a href="{{ url_for('auth.pristupy') }}" class="list-group-item list-group-item-action">
+                  📍 Moje přístupy
+                </a>
+                <a href="{{ url_for('auth.skupiny') }}" class="list-group-item list-group-item-action">
+                  👥 Moje skupiny
+                </a>
+                <a href="{{ url_for('auth.vypisy') }}" class="list-group-item list-group-item-action">
+                  📅 Výpis po měsících
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Informace</h5>
+              </div>
+              <div class="card-body">
+                <p><strong>Uživatel:</strong> {{ current_user.username|e }}</p>
+                <p><strong>Email:</strong> {{ current_user.email|e }}</p>
+                <p class="mb-0"><strong>Stav účtu:</strong> <span class="badge bg-success">Aktivní</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}
