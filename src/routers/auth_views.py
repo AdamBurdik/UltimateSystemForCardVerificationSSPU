@@ -53,11 +53,11 @@ class AnonymousUser:
 class MockForm:
     """Mock form object for templates"""
     def __init__(self):
-        self.email = MockField()
-        self.password = MockField()
-        self.username = MockField()
-        self.remember_me = MockField()
-        self.csrf_token = MockField()
+        self.email = MockField(name="email", label="Email")
+        self.password = MockField(name="password", label="Password")
+        self.username = MockField(name="username", label="Username")
+        self.remember_me = MockField(name="remember_me", label="Remember me")
+        self.csrf_token = MockField(name="csrf_token", label="")
     
     def hidden_tag(self):
         return ''
@@ -65,8 +65,11 @@ class MockForm:
 
 class MockField:
     """Mock form field"""
-    def __init__(self, data=''):
+    def __init__(self, name: str, label: str = "", data: str = ""):
+        self.name = name
+        self.label = label or name.capitalize()
         self.data = data
+        self.errors = []
 
 
 def get_template_context(request: Request, db: Session, **kwargs):

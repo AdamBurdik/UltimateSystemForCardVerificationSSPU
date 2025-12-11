@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 from .config import settings
 from .database import get_db
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing (bcrypt_sha256 avoids 72-byte limit of raw bcrypt)
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 # OAuth2 scheme for token authentication
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

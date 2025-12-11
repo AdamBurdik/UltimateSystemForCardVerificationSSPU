@@ -57,15 +57,44 @@ pip install fastapi uvicorn 'pydantic[email]' pydantic-settings \
 
 ## Step 4: Configure Environment Variables
 
-Create a `.env` file in the project root directory:
-**Ensure that it is encoded in plain UTF-8!!!**
+Create a `.env` file in the project root directory.
+
+▼ ▼ ▼ ▼
+
+**IMPORTANT: The `.env` file MUST be encoded in UTF-8 without BOM!**
+
+▲ ▲ ▲ ▲
+
+### Option 1: Using VS Code (Recommended for Windows)
+
+1. In VS Code, create a new file `.env` in the project root
+2. Add the configuration (see example below)
+3. Check the encoding in the bottom-right corner of VS Code
+4. If it shows anything other than "UTF-8", click it and select "Save with Encoding" → "UTF-8"
+
+### Option 2: Using PowerShell (Windows)
+
+```powershell
+# Generate secret key and create .env file with UTF-8 encoding
+$secretKey = py -c "import secrets; print(secrets.token_hex(32))"
+@"
+SECRET_KEY=$secretKey
+DATABASE_URL=sqlite:///./dev.db
+APP_ENV=dev
+DEBUG=true
+"@ | Out-File -FilePath .env -Encoding utf8 -NoNewline
+```
+
+### Option 3: Using Bash (Linux/macOS)
 
 ```bash
 # Generate a secure secret key
-py -c "import secrets; print(f'SECRET_KEY={secrets.token_hex(32)}')" > .env
+python3 -c "import secrets; print(f'SECRET_KEY={secrets.token_hex(32)}')" > .env
 
 # Add database URL (SQLite for development)
 echo "DATABASE_URL=sqlite:///./dev.db" >> .env
+echo "APP_ENV=dev" >> .env
+echo "DEBUG=true" >> .env
 ```
 
 **Full `.env` file example:**
@@ -109,8 +138,12 @@ python3 -c "from src.database import engine, Base; Base.metadata.create_all(engi
 ### Development Server (with auto-reload)
 
 ```bash
-# Using the run.py script
+# Using the run.py script (Linux/macOS)
 ./run.py --reload
+
+# Using the run.py script (Windows)
+py run.py --reload
+# Or: python run.py --reload
 
 # Or using uvicorn directly
 uvicorn src.main:app --reload --host 127.0.0.1 --port 8000
@@ -145,7 +178,7 @@ Open <http://localhost:8000/api/docs> in your browser. You can:
 2. Test endpoints directly from the browser
 3. See request/response schemas
 
-### Using curl
+### Using curl (Linux/macOS)
 
 ```bash
 # Health check
@@ -171,6 +204,78 @@ curl http://localhost:8000/auth/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
+### Using PowerShell (Windows)
+
+```powershell
+# Health check
+curl http://localhost:8000/health
+
+# Register a new user
+$body = @{
+    username = "testuser"
+    email = "test@example.com"
+    password = "password123"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:8000/auth/register" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body $body
+
+# Login and get JWT token
+$loginBody = @{
+    username = "test@example.com"
+    password = "password123"
+}
+
+$response = Invoke-RestMethod -Uri "http://localhost:8000/auth/login" `
+  -Method Post `
+  -ContentType "application/x-www-form-urlencoded" `
+  -Body $loginBody
+
+$token = $response.access_token
+
+# Use the token to access protected endpoints
+$headers = @{
+    Authorization = "Bearer $token"
+}
+
+Invoke-RestMethod -Uri "http://localhost:8000/auth/me" `
+  -Headers $headers
+```
+
+### Using Python requests
+
+```python
+import requests
+
+# Health check
+response = requests.get("http://localhost:8000/health")
+print(response.json())
+
+# Register a new user
+user_data = {
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "password123"
+}
+response = requests.post("http://localhost:8000/auth/register", json=user_data)
+print(response.json())
+
+# Login and get JWT token
+login_data = {
+    "username": "test@example.com",
+    "password": "password123"
+}
+response = requests.post("http://localhost:8000/auth/login", data=login_data)
+token = response.json()["access_token"]
+
+# Use the token to access protected endpoints
+headers = {"Authorization": f"Bearer {token}"}
+response = requests.get("http://localhost:8000/auth/me", headers=headers)
+print(response.json())
+```
+
 ## Step 8: Run Tests
 
 ```bash
@@ -189,13 +294,50 @@ pytest -v
 
 ## Troubleshooting
 
+### UnicodeDecodeError: 'utf-8' codec can't decode byte
+
+This error occurs when the `.env` file is not encoded in UTF-8:
+
+#### **Solution 1: Fix encoding in VS Code**
+
+1. Open `.env` in VS Code
+2. Click on the encoding in the bottom-right corner (e.g., "UTF-16 LE")
+3. Select "Save with Encoding"
+4. Choose "UTF-8" (NOT "UTF-8 with BOM")
+5. Save the file
+
+#### **Solution 2: Recreate the file**
+
+```powershell
+# Windows PowerShell - backup old file and create new one
+if (Test-Path .env) { Move-Item .env .env.backup }
+$secretKey = py -c "import secrets; print(secrets.token_hex(32))"
+@"
+SECRET_KEY=$secretKey
+DATABASE_URL=sqlite:///./dev.db
+APP_ENV=dev
+DEBUG=true
+"@ | Out-File -FilePath .env -Encoding utf8 -NoNewline
+```
+
+#### **Solution 3: Use Notepad++ (Windows)**
+
+1. Open `.env` in Notepad++
+2. Menu: Encoding → Convert to UTF-8 (NOT UTF-8 BOM)
+3. Save the file
+
 ### Import Errors
 
 If you get import errors, make sure you're in the project root and the virtual environment is activated:
 
 ```bash
+# Linux/macOS
 pwd  # Should show the project directory
 which python  # Should show the venv python
+
+# Windows PowerShell
+Get-Location  # Should show the project directory
+Get-Command python | Select-Object -ExpandProperty Source  # Should show venv python
 ```
 
 ### Database Errors
@@ -212,10 +354,13 @@ If port 8000 is already in use:
 
 ```bash
 # Use a different port
-./run.py --port 8080
+py run.py --port 8080
 
-# Or kill the process using port 8000
-lsof -ti:8000 | xargs kill -9  # Linux/macOS
+# Windows PowerShell - find and kill process on port 8000
+Get-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess | Stop-Process -Force
+
+# Linux/macOS - kill the process using port 8000
+lsof -ti:8000 | xargs kill -9
 ```
 
 ### Email Validation Errors

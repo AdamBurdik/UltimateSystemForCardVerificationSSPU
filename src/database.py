@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from typing import Generator
 
 from .config import settings
+from .data.base import Base  # use shared Base with models
 
 # Create database engine
 engine = create_engine(
@@ -15,8 +16,7 @@ engine = create_engine(
 # Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for models
-Base = declarative_base()
+# Base class for models comes from data.base so all models share one metadata
 
 
 def get_db() -> Generator[Session, None, None]:

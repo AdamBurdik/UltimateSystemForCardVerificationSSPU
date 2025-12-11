@@ -1,33 +1,94 @@
-# Compiled Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
 *.py[cod]
+*$py.class
+*.so
 
-# Cached Flask Assets
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Flask / FastAPI
+instance/
 .webassets-cache/
-
-# Codegen
-src/web/static/css/compiled-scss.css
-src/web/static/css/bundle.min.css
-
-# Project environment variables
-src/.env
-.env
-
-# Logs and databases #
-*.log
+*.db
 *dev.db
 
-# Testing
-nosetests.xml
+# Compiled CSS
+src/web/static/css/compiled-scss.css
+src/web/static/css/bundle.min.css
+src/static/css/compiled-scss.css
+src/static/css/bundle.min.css
 
-# Packages
-*.egg
-*.egg-info
-__pycache__
-*.idea
-# Vim history
+# Environment variables
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+src/.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*#
+.#*
+*.swp
 .netrwhist
 
-# OS generated files #
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+*.db
+
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -35,9 +96,22 @@ __pycache__
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Editor detritus
-*~
-*#
-.#*
-.*.swp
+# Uploaded files
+src/uploads/*
+!src/uploads/.gitkeep
+
+# Migration specific
+migrations/versions/*.pyc
+
+# Heroku
+.heroku/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
