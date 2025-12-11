@@ -1,24 +1,31 @@
-from flask_login import UserMixin
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Boolean, Integer, String
-from sqlalchemy.orm import relationship,backref
+from sqlalchemy.types import Boolean, Integer, String, DateTime
+from sqlalchemy.orm import relationship, backref
 
 from sqlalchemy import cast, Numeric
 
 from ..database import db
 from ..mixins import CRUDModel
 from ..util import generate_random_token
-from ...settings import app_config
-from ...extensions import bcrypt
+from datetime import datetime
+import calendar
+
+try:
+    from ...settings import app_config
+    from ...extensions import bcrypt
+except ImportError:
+    # For FastAPI, these aren't needed
+    app_config = None
+    bcrypt = None
+
 from .vazby import User_has_group
 from .carddata import Card
 from .group import Group
 from .grouphastimecard import Group_has_timecard
 from .timecard import Timecard
-from datetime import datetime
-import calendar
 
-class User(CRUDModel, UserMixin):
+
+class User(CRUDModel):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
@@ -27,8 +34,11 @@ class User(CRUDModel, UserMixin):
     password_hash = Column(String(128))
     username = Column(String(64), nullable=True, unique=True, index=True, doc="The user's username.")
     verified = Column(Boolean(name="verified"), nullable=False, default=False)
+    is_active = Column(Boolean, nullable=False, default=True, doc="Whether the user account is active")
+    created_at = Column(DateTime, default=datetime.utcnow, doc="When the user was created")
     card_number = Column(String(32), unique=False, index=True, doc="Card access number")
     name = Column(String(60), unique=False, index=True, doc="Name")
+    first_name = Column(String(60), unique=False, index=True, doc="First name")  # Alias for name
     second_name = Column(String(60), unique=False, index=True, doc="Second name")
     access = Column(String(1), index=True, doc="Access")
     chip_number = Column(String(10), unique=False, index= True, doc= "Chip number", nullable=False)
@@ -58,14 +68,26 @@ class User(CRUDModel, UserMixin):
     # pylint: disable=R0201
     @property
     def password(self):
-        raise AttributeError('password is not a readable attribute')
+        """Password getter - returns password_hash for FastAPI compatibility"""
+        return self.password_hash
 
     @password.setter
     def password(self, password):
-        self.password_hash = bcrypt.generate_password_hash(password, app_config.BCRYPT_LOG_ROUNDS)
+        """Password setter - hashes password before storing"""
+        if bcrypt:  # Flask mode
+            self.password_hash = bcrypt.generate_password_hash(password, app_config.BCRYPT_LOG_ROUNDS)
+        else:  # FastAPI mode - password should already be hashed
+            self.password_hash = password
 
     def verify_password(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password)
+        """Verify password - works with both Flask and FastAPI"""
+        if bcrypt:
+            return bcrypt.check_password_hash(self.password_hash, password)
+        else:
+            # For FastAPI, use passlib directly
+            from passlib.context import CryptContext
+            pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+            return pwd_context.verify(password, self.password_hash)
 
     def is_verified(self):
         " Returns whether a user has verified their email "
