@@ -3,12 +3,12 @@ import re
 
 from datetime import datetime, date
 
-from flask_wtf import Form
-from wtforms.fields import BooleanField, TextField, PasswordField,SelectField,FieldList, SelectMultipleField, RadioField
+from flask_wtf import FlaskForm
+from wtforms.fields import BooleanField, StringField, PasswordField, SelectField, FieldList, SelectMultipleField, RadioField
 from flask_wtf.file import FileField
-from wtforms_components  import TimeField
+from wtforms_components import TimeField
 from wtforms import validators
-from wtforms.validators import EqualTo, Email, InputRequired, Length,regexp
+from wtforms.validators import EqualTo, Email, InputRequired, Length, Regexp
 
 from ..data.models import User, Group, Timecard, User_has_group, Group_has_timecard
 from ..fields import Predicate
@@ -40,8 +40,8 @@ def isnumeric(s):
         return True
     return re.match(r'^[012345679]+$', s) is not None
 
-class EmailForm(Form):
-    email = TextField('Email Address', validators=[
+class EmailForm(FlaskForm):
+    email = StringField('Email Address', validators=[
         Email(message="Please enter a valid email address"),
         InputRequired(message="Pole musí být vyplněno")
     ])
@@ -54,7 +54,7 @@ class LoginForm(EmailForm):
 
     remember_me = BooleanField('Keep me logged in')
 
-class ResetPasswordForm(Form):
+class ResetPasswordForm(FlaskForm):
     password = PasswordField('New password', validators=[
         EqualTo('confirm', message='Passwords must match'),
         Predicate(safe_characters, message="Prosím použijte písmena (a-z) a čísla"),
@@ -64,8 +64,8 @@ class ResetPasswordForm(Form):
 
     confirm = PasswordField('Ověření hesla')
 
-class RegistrationForm(Form):
-    username = TextField('Uživatelské jméno', validators=[
+class RegistrationForm(FlaskForm):
+    username = StringField('Uživatelské jméno', validators=[
         Predicate(safe_characters, message="Prosím použijte písmena (a-z) a čísla"),
         Predicate(username_is_available,
                   message="Jméno už je obsazeno"),
@@ -73,7 +73,7 @@ class RegistrationForm(Form):
         InputRequired(message="Pole musí být vyplněno")
     ])
 
-    email = TextField('E-Mail', validators=[
+    email = StringField('E-Mail', validators=[
         Predicate(email_is_available, message="Tento e-mail už používá jiný uživatel"),
         Email(message="Adresa není zadaná ve správném tvaru"),
         InputRequired(message="Pole musí být vyplněno")
@@ -86,14 +86,14 @@ class RegistrationForm(Form):
     ])
 
 
-class EditUserForm(Form):
-    username = TextField('Uzivatelske jmeno', validators=[
+class EditUserForm(FlaskForm):
+    username = StringField('Uzivatelske jmeno', validators=[
         Predicate(safe_characters, message="Prosím použijte písmena (a-z) a čísla"),
         Length(min=6, max=30, message="Prosím zadejte jméno v délce 5-30 znaků"),
         InputRequired(message="Pole musí být vyplněno")
     ])
 
-    email = TextField('E-Mail', validators=[
+    email = StringField('E-Mail', validators=[
         Email(message="Adresa není zadaná ve správném tvaru"),
         InputRequired(message="Pole musí být vyplněno")
     ])
@@ -104,32 +104,32 @@ class EditUserForm(Form):
         InputRequired(message="Pole musí být vyplněno")
     ])
 
-    card_number = TextField('Your access Card number', validators=[
+    card_number = StringField('Your access Card number', validators=[
         Predicate(isnumeric, message="Pleas only number value is possible")
 
     ])
-    name = TextField('Name', validators=[
+    name = StringField('Name', validators=[
         InputRequired(message="Pole musí být vyplněno")
     ])
 
-    second_name = TextField('Second Name', validators=[
+    second_name = StringField('Second Name', validators=[
         InputRequired(message="Pole musí být vyplněno")
     ])
 
     access=SelectField('Access',choices=[('A', 'SuperAdmin'), ('B', 'Admin'), ('U', 'User')])
 
-    chip_number = TextField('Your Chip number', validators=[
+    chip_number = StringField('Your Chip number', validators=[
         Predicate(hexa_characters, message="Pouze znaky a-f a čísla")
     ])
 
-class Editdate(Form):
+class Editdate(FlaskForm):
     #startdate = TimeField('Datum prichodu')
     enddate = TimeField('Datum odchodu')
     startdate = TimeField('Datum prichodu')
-    #enddate = TextField('Datum odchodu')
+    #enddate = StringField('Datum odchodu')
 
 
-class MonthInsert(Form):
+class MonthInsert(FlaskForm):
     datum = datetime.today()
     months_choices = []
     for i in range(9,13):
@@ -141,7 +141,7 @@ class MonthInsert(Form):
     month = SelectField('Vyber', default=datetime(datum.year, datum.month, 1).strftime('%Y-%m'),choices = months_choices)
     skupina = SelectField('Skupina',choices=Group.getIdName(),default='Ucitele')
 
-class FileUploadForm(Form):
+class FileUploadForm(FlaskForm):
     #fileName = FieldList(FileField())
     filename = FileField(u'Soubor xml', validators=[
         InputRequired(message="Musíte vybrat soubor")
@@ -154,16 +154,16 @@ class FileUploadForm(Form):
         if field.data:
             field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
 
-class GroupInsertForm(Form):
-    group_name = TextField('Type group name', validators=[
+class GroupInsertForm(FlaskForm):
+    group_name = StringField('Type group name', validators=[
         Predicate(safe_characters, message="Prosím použijte písmena (a-z) a čísla"),
         Length(min=2, max=30, message="Please use between 2 and 30 characters"),
         InputRequired(message="Pole musí být vyplněno")
     ])
-    access_time_from = TextField('Set access time from', validators=[
+    access_time_from = StringField('Set access time from', validators=[
         InputRequired(message="Pole musí být vyplněno")
     ])
-    access_time_to = TextField('Set access time to', validators=[
+    access_time_to = StringField('Set access time to', validators=[
         InputRequired(message="Pole musí být vyplněno")
     ])
     Monday = BooleanField("Monday",validators=None)
@@ -174,36 +174,36 @@ class GroupInsertForm(Form):
     Saturday = BooleanField("Saturday",validators=None)
     Sunday = BooleanField("Sunday",validators=None)
 
-class TimecardInsertForm(Form):
-    timecard_name = TextField('Nazev ctecky', validators=[
+class TimecardInsertForm(FlaskForm):
+    timecard_name = StringField('Nazev ctecky', validators=[
         Length(min=2, max=30, message="Please use between 2 and 30 characters"),
         InputRequired(message="Pole musí být vyplněno")
     ])
-    timecard_head = TextField('Nazev v URL', validators=[
+    timecard_head = StringField('Nazev v URL', validators=[
         Predicate(safe_characters, message="Prosím použijte písmena (a-z) a čísla"),
         InputRequired(message="Pole musí být vyplněno")
     ])
 
 
-    identreader = TextField('MQTT identifikace ctecky')
+    identreader = StringField('MQTT identifikace ctecky')
 
 
-    pushopen = TextField('MQTT otevreni dveri')
+    pushopen = StringField('MQTT otevreni dveri')
 
 
-class AddUserToGroupForm(Form):
+class AddUserToGroupForm(FlaskForm):
     select_user = SelectMultipleField(choices=[])
     select_group = SelectMultipleField(choices=[])
 
-class GroupForm(Form):
+class GroupForm(FlaskForm):
     groups = SelectField(choices=[])
 
-class TimecardForm(Form):
+class TimecardForm(FlaskForm):
     timecards = SelectField(choices=[])
 
-class AssignTimecardForm(Form):
+class AssignTimecardForm(FlaskForm):
     select_group = SelectMultipleField(choices=[])
     select_timecard = SelectMultipleField(choices=[])
-class InputCard(Form):
-    card_number = TextField('Your access Card number', validators=[
+class InputCard(FlaskForm):
+    card_number = StringField('Your access Card number', validators=[
         Predicate(isnumeric, message="Pleas only number value is possible")])

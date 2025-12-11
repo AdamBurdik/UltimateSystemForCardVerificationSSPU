@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # import  os
-from flask import (Blueprint, escape, flash, render_template,
+from flask import (Blueprint, flash, render_template,
                    redirect, request, url_for, jsonify, abort)
 from flask_login import current_user, login_required, login_user, logout_user
+from markupsafe import escape
 # from werkzeug.utils import secure_filename
 from sqlalchemy import func, asc, Date, cast, extract
 from sqlalchemy.types import DateTime
@@ -19,7 +20,6 @@ from ..extensions import login_manager
 from datetime import datetime, timedelta
 from .xmlparse import mujxmlparse
 from .xml_users import xml_users
-from django.utils.safestring import mark_safe
 import simplejson
 
 
