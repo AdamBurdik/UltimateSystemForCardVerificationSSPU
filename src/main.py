@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import HTMLResponse
 import os
 
@@ -10,6 +11,13 @@ from .database import engine, Base
 
 # Import routers
 from .routers import auth
+from . import util  # Import utilities for Jinja2 context
+
+# Create shared templates instance with custom url_for
+templates = Jinja2Templates(directory=settings.TEMPLATES_DIR)
+
+# Override url_for with our custom implementation
+templates.env.globals['url_for'] = util.url_for
 
 
 def create_app() -> FastAPI:
@@ -22,6 +30,14 @@ def create_app() -> FastAPI:
         debug=settings.DEBUG,
         docs_url="/api/docs" if settings.DEBUG else None,
         redoc_url="/api/redoc" if settings.DEBUG else None,
+    )
+    
+    # Add session middleware for template-based authentication
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=settings.SECRET_KEY,
+        session_cookie="session",
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
     
     # Configure CORS
@@ -37,13 +53,18 @@ def create_app() -> FastAPI:
     if os.path.exists(settings.STATIC_DIR):
         app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
     
-    # Setup Jinja2 templates
-    templates = Jinja2Templates(directory=settings.TEMPLATES_DIR)
-    
     # Register routers
-    app.include_router(auth.router, prefix="/auth", tags=["auth"])
-    # app.include_router(public.router, prefix="", tags=["public"])
-    # app.include_router(services.router, prefix="/services", tags=["services"])
+    # API routers (JWT authentication)
+    app.include_router(auth.router, prefix="/api/auth", tags=["api-auth"])
+    
+    # GUI routers (session-based authentication)
+    from .routers import auth_views, public_views
+    # Set the shared templates instance on the routers
+    public_views.templates = templates
+    auth_views.templates = templates
+    
+    app.include_router(public_views.router, tags=["public"])
+    app.include_router(auth_views.router, prefix="/auth", tags=["auth"])
     
     # Create database tables (in production, use Alembic migrations)
     @app.on_event("startup")
@@ -53,47 +74,7 @@ def create_app() -> FastAPI:
         if settings.DEBUG:
             Base.metadata.create_all(bind=engine)
     
-    @app.get("/", response_class=HTMLResponse)
-    async def root():
-        """Root endpoint - returns HTML homepage"""
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>{settings.APP_NAME}</title>
-            <style>
-                body {{ font-family: Arial, sans-serif; margin: 40px; }}
-                .container {{ max-width: 800px; margin: 0 auto; }}
-                h1 {{ color: #333; }}
-                .info {{ background: #f0f0f0; padding: 20px; border-radius: 5px; }}
-                .links {{ margin-top: 20px; }}
-                a {{ color: #0066cc; text-decoration: none; margin-right: 20px; }}
-                a:hover {{ text-decoration: underline; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>🎫 {settings.APP_NAME}</h1>
-                <p>Version: <strong>{settings.APP_VERSION}</strong></p>
-                
-                <div class="info">
-                    <h2>Welcome!</h2>
-                    <p>This is the Ultimate System for Card Verification.</p>
-                    <p>Status: ✅ Running</p>
-                </div>
-                
-                <div class="links">
-                    <h3>Available Resources:</h3>
-                    <a href="/api/docs">📚 API Documentation (Swagger)</a><br/>
-                    <a href="/api/redoc">📖 API ReDoc</a><br/>
-                    <a href="/health">💚 Health Check</a><br/>
-                    <a href="/auth">🔐 Authentication</a>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-        return html
+
     
     @app.get("/health")
     async def health_check():
