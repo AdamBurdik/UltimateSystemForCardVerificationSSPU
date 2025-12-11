@@ -1,36 +1,46 @@
-#ep8>=1.5.6
-pylint>=1.2.1
-flask==0.10.1
-Flask-Assets
-#
-#flask-bcrypt ===> sudo apt-get install python3.5-dev    easy_install flask-bcrypt
-flask-login==0.2.11
-flask-mail==0.9.0
-flask-migrate
-flask-script==2.0.5
-flask-wtf==0.9.5
-alembic
-pytest==2.5.2
-webtest==2.0.15
-cssmin==0.2.0
-gunicorn==0.17.2
-sqlalchemy==0.9.3
-WTForms-Components
-simplejson
-xmltodict
-Werkzeug
-paho-mqtt
-django
-pymysql
-python-socketio
-flask-socketio==0.6.0
-scss
-flask_bcrypt
-decorator
-infinity
-#blockspring
-#psycopg2==2.5.2
-# mysql -- sudo pip install mysql-connector-python --allow-external mysql-connector-python
-#pip install --user --allow-external mysql-connector-python mysql-connector-python
+# Code quality and linting
+pycodestyle>=2.11.0
+pylint>=3.0.0
+
+# Flask core and extensions
+flask>=3.0.0
+Flask-Assets>=2.1.0
+flask-bcrypt>=1.0.0
+flask-login>=0.6.3
+flask-mail>=0.9.1
+flask-migrate>=4.0.0
+flask-wtf>=1.2.0
+Werkzeug>=3.0.0
+
+# Database
+alembic>=1.13.0
+sqlalchemy>=2.0.0
+pymysql>=1.1.0
+
+# Forms
+WTForms>=3.1.0
+WTForms-Components>=0.10.5
+
+# Testing
+pytest>=7.4.0
+webtest>=3.0.0
+
+# Asset processing
+cssmin>=0.2.0
+libsass>=0.23.0
+
+# Production server
+gunicorn>=21.2.0
+
+# Utilities
+simplejson>=3.19.0
+xmltodict>=0.13.0
+decorator>=5.1.0
+infinity>=1.5
+
+# MQTT and WebSocket support
+paho-mqtt>=1.6.0
+python-socketio>=5.10.0
+flask-socketio>=5.3.0
 
 

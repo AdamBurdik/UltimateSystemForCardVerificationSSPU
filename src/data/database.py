@@ -6,7 +6,8 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from .base import Base, BaseQuery
 from ..settings import app_config
 
-class DatabaseConnection(object):
+
+class DatabaseConnection:
     " A database connection "
     def __init__(self, url, **factory_args):
         self.engine = create_engine(url)
@@ -39,6 +40,7 @@ class DatabaseConnection(object):
             raise
         finally:
             session.close()
-#db = DatabaseConnection(app.config['SQLALCHEMY_DATABASE_URI'])
-#db = DatabaseConnection(app_config.SQLALCHEMY_DATABASE_URI)
-db = DatabaseConnection(os.environ['DATABASE_URL'])
+
+
+# Initialize database connection with DATABASE_URL from environment
+db = DatabaseConnection(os.environ.get('DATABASE_URL', 'sqlite:///dev.db'))
