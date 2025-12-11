@@ -73,15 +73,15 @@ def get_template_context(request: Request, db: Session, **kwargs):
     """Helper to create standard template context with get_flashed_messages"""
     user = get_current_user_from_session(request, db) or AnonymousUser()
     
+    # Get flash messages but don't clear them yet - let template decide
+    flash_messages_store = request.session.get("flash_messages", [])
+    
     def get_flashed_messages_func(with_categories=False):
-        messages = request.session.get("flash_messages", [])
-        # Don't pop here, let the template call handle it
+        # Clear messages on first call
+        messages = request.session.pop("flash_messages", [])
         if with_categories:
             return [(msg["category"], msg["message"]) for msg in messages]
         return [msg["message"] for msg in messages]
-    
-    # Clear flash messages after retrieving them
-    request.session.pop("flash_messages", None)
     
     context = {
         "request": request,
@@ -112,7 +112,8 @@ async def login_submit(
     """Handle login form submission"""
     user = db.query(User).filter(User.email == email).first()
     
-    if user and user.verify_password(password):
+    # Use verify_password function from auth_utils
+    if user and verify_password(password, user.password):
         # Store user ID in session
         request.session["user_id"] = user.id
         FlashMessage.add(request, "Logged in successfully", "info")

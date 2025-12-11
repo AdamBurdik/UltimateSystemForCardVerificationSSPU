@@ -14,6 +14,16 @@ router = APIRouter()
 templates = Jinja2Templates(directory=settings.TEMPLATES_DIR)
 
 
+def get_current_user_from_session(request: Request, db: Session):
+    """Get current user from session if exists (pass db explicitly)"""
+    user_id = request.session.get("user_id")
+    if user_id:
+        from ..data.models import User
+        user = db.query(User).filter(User.id == user_id).first()
+        return user
+    return None
+
+
 def get_flashed_messages(request: Request, with_categories=False):
     """Get flash messages from session"""
     messages = request.session.pop("flash_messages", [])
@@ -22,18 +32,8 @@ def get_flashed_messages(request: Request, with_categories=False):
     return [msg["message"] for msg in messages]
 
 
-# Add get_flashed_messages to template globals
-templates.env.globals['get_flashed_messages'] = get_flashed_messages
-
-
-def get_current_user_from_session(request: Request, db: Session = Depends(get_db)):
-    """Get current user from session if exists"""
-    user_id = request.session.get("user_id")
-    if user_id:
-        from ..data.models import User
-        user = db.query(User).filter(User.id == user_id).first()
-        return user
-    return None
+# Remove the broken template global registration
+# templates.env.globals['get_flashed_messages'] = get_flashed_messages
 
 
 class AnonymousUser:

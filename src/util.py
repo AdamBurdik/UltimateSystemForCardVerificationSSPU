@@ -42,6 +42,8 @@ def url_for(endpoint: str, **kwargs) -> str:
     Returns:
         URL path string
     """
+    from urllib.parse import urlencode
+    
     # Map of endpoint names to URL paths
     endpoint_map = {
         'public.index': '/',
@@ -77,9 +79,9 @@ def url_for(endpoint: str, **kwargs) -> str:
     # Get base URL from map
     url = endpoint_map.get(endpoint, '/' + endpoint.replace('.', '/'))
     
-    # Add query parameters if provided
+    # Add query parameters if provided (properly URL-encoded)
     if kwargs:
-        params = '&'.join([f"{k}={v}" for k, v in kwargs.items()])
+        params = urlencode(kwargs)
         url = f"{url}?{params}"
     
     return url
